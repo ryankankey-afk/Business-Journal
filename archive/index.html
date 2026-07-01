@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Centerline — Archive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0B0E14; --surface:#12151F; --border:#232838;
+    --text:#EDEFF3; --text-dim:#8A93A6; --text-faint:#565E70; --accent:#4F7CFF;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{ background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+  .wrap{ max-width:760px; margin:0 auto; padding:0 24px; }
+  header{ padding:38px 0 24px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:16px; }
+  .brand{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:28px; letter-spacing:-0.5px; }
+  .brand span{ color:var(--accent); }
+  nav a{ color:var(--text-dim); text-decoration:none; font-size:13px; font-family:'JetBrains Mono',monospace; margin-left:18px; }
+  nav a:hover, nav a.active{ color:var(--accent); }
+  h1{ font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:20px; margin:32px 0 18px; }
+  .day-list{ background:var(--surface); border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+  .day-row{ display:flex; justify-content:space-between; align-items:center; padding:14px 18px; border-top:1px solid var(--border); text-decoration:none; color:var(--text); font-size:14px; }
+  .day-row:first-child{ border-top:none; }
+  .day-row:hover{ background:#171B27; color:var(--accent); }
+  .day-arrow{ color:var(--text-faint); font-family:'JetBrains Mono',monospace; font-size:12px; }
+  .empty{ color:var(--text-dim); font-size:14px; padding:24px 0; }
+  footer{ margin-top:40px; padding:22px 0 40px; border-top:1px solid var(--border); font-size:11.5px; color:var(--text-faint); font-family:'JetBrains Mono',monospace; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">CENTER<span>LINE</span></div>
+      <nav>
+        <a href="../index.html">Today</a>
+        <a href="index.html" class="active">Archive</a>
+      </nav>
+    </header>
+
+    <h1>Past Editions</h1>
+    <div class="day-list">
+      
+        
+        <a class="day-row" href="2026-07-01.html">
+          <span>Wednesday, July 1, 2026</span>
+          <span class="day-arrow">VIEW →</span>
+        </a>
+        
+      
+    </div>
+
+    <footer>Centerline · Auto-generated daily at 7:00 AM CT</footer>
+  </div>
+</body>
+</html>
