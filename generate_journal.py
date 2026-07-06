@@ -7,7 +7,7 @@ Data sources (no paid API keys required):
   - Market data: Yahoo Finance via the `yfinance` package
   - News: public RSS feeds via `feedparser`
 
-Run manually any time with:  python generate_journal.py --force
+Run manually any time with:  python generate_journal.py
 """
 
 import os
@@ -241,14 +241,4 @@ def build():
 
 
 if __name__ == "__main__":
-    force = "--force" in sys.argv
-    hour_ct = datetime.now(CENTRAL).hour
-
-    # The GitHub Actions workflow fires at two UTC times to cover both sides of
-    # Daylight Saving Time. Only actually regenerate the page during the 7am
-    # Central hour (or any time, if --force is passed for manual/testing runs).
-    if not force and hour_ct != 7:
-        print(f"[skip] current Central hour is {hour_ct}, not 7. Use --force to override.")
-        sys.exit(0)
-
     build()
