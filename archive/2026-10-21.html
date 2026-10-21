@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Centerline — Wednesday, October 21, 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#0B0E14;
+    --surface:#12151F;
+    --surface-2:#171B27;
+    --border:#232838;
+    --text:#EDEFF3;
+    --text-dim:#8A93A6;
+    --text-faint:#565E70;
+    --accent:#4F7CFF;
+    --accent-soft:rgba(79,124,255,0.12);
+    --pos:#1FCB86;
+    --pos-soft:rgba(31,203,134,0.12);
+    --neg:#FF5C5C;
+    --neg-soft:rgba(255,92,92,0.12);
+    --kc:#D9A24B;
+    --kc-soft:rgba(217,162,75,0.12);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    line-height:1.5;
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .display{font-family:'Space Grotesk',sans-serif;}
+
+  /* Ticker tape — signature element */
+  .ticker-wrap{
+    background:#000;
+    border-bottom:1px solid var(--border);
+    overflow:hidden;
+    white-space:nowrap;
+    padding:9px 0;
+  }
+  .ticker{
+    display:inline-block;
+    animation:scroll 38s linear infinite;
+  }
+  .ticker-wrap:hover .ticker{ animation-play-state:paused; }
+  @keyframes scroll{
+    0%{ transform:translateX(0); }
+    100%{ transform:translateX(-50%); }
+  }
+  .ticker-item{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:12.5px;
+    padding:0 22px;
+    color:var(--text-dim);
+    border-right:1px solid var(--border);
+  }
+  .ticker-item b{ color:var(--text); font-weight:600; }
+  .up{ color:var(--pos); }
+  .down{ color:var(--neg); }
+
+  .wrap{ max-width:1040px; margin:0 auto; padding:0 24px; }
+
+  /* Masthead */
+  header.masthead{
+    padding:38px 0 26px;
+    border-bottom:1px solid var(--border);
+  }
+  .masthead-row{
+    display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:16px;
+  }
+  .brand{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:34px;
+    letter-spacing:-0.5px;
+  }
+  .brand span{ color:var(--accent); }
+  .tagline{
+    color:var(--text-dim);
+    font-size:14px;
+    margin-top:4px;
+  }
+  .meta{
+    text-align:right;
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    color:var(--text-faint);
+    line-height:1.7;
+  }
+  .meta .liveDot{
+    display:inline-block; width:6px; height:6px; border-radius:50%;
+    background:var(--pos); margin-right:6px;
+    box-shadow:0 0 0 3px var(--pos-soft);
+  }
+
+  /* Hero snapshot */
+  section.hero{ padding:32px 0 8px; }
+  .section-label{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    letter-spacing:1.5px;
+    color:var(--text-faint);
+    text-transform:uppercase;
+    margin-bottom:14px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .section-label::after{
+    content:''; flex:1; height:1px; background:var(--border);
+  }
+
+  .index-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:1px;
+    background:var(--border);
+    border:1px solid var(--border);
+    border-radius:10px;
+    overflow:hidden;
+  }
+  .index-card{
+    background:var(--surface);
+    padding:18px 18px 16px;
+  }
+  .index-name{ font-size:12.5px; color:var(--text-dim); margin-bottom:8px; }
+  .index-price{
+    font-family:'JetBrains Mono',monospace;
+    font-size:21px; font-weight:600;
+  }
+  .index-change{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12.5px; margin-top:4px;
+  }
+
+  /* Chart panel */
+  .chart-panel{
+    margin-top:20px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:20px;
+  }
+  .chart-panel-head{
+    display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;
+  }
+  .chart-title{ font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:15px; }
+  .chart-sub{ font-size:12px; color:var(--text-faint); font-family:'JetBrains Mono',monospace; }
+  .chart-box{ height:220px; }
+
+  /* Watchlist */
+  .watchlist{
+    margin-top:20px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    overflow:hidden;
+  }
+  .watchlist-head{
+    padding:14px 18px; border-bottom:1px solid var(--border);
+    font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:14px;
+  }
+  table.wl{ width:100%; border-collapse:collapse; }
+  table.wl td{ padding:11px 18px; font-size:13px; border-top:1px solid var(--border); }
+  table.wl tr:first-child td{ border-top:none; }
+  .wl-ticker{ font-family:'JetBrains Mono',monospace; font-weight:600; }
+  .wl-name{ color:var(--text-dim); }
+  .wl-price{ font-family:'JetBrains Mono',monospace; text-align:right; }
+  .wl-change{ font-family:'JetBrains Mono',monospace; text-align:right; width:90px; }
+
+  /* News sections */
+  .news-grid{
+    margin-top:36px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+  }
+  .news-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:20px;
+  }
+  .news-card.kc{ grid-column:1 / -1; border-color:#2A2415; }
+  .news-card-head{
+    display:flex; align-items:center; gap:8px; margin-bottom:14px;
+  }
+  .badge{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10.5px; letter-spacing:0.5px;
+    padding:3px 8px; border-radius:5px;
+    background:var(--accent-soft); color:var(--accent);
+  }
+  .badge.kc{ background:var(--kc-soft); color:var(--kc); }
+  .news-card-title{ font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:15px; }
+  .news-item{
+    padding:11px 0; border-top:1px solid var(--border);
+  }
+  .news-item:first-child{ border-top:none; padding-top:0; }
+  .news-item a{
+    color:var(--text); text-decoration:none; font-size:13.5px; font-weight:500;
+    display:block; margin-bottom:3px;
+  }
+  .news-item a:hover{ color:var(--accent); }
+  .news-source{ font-size:11px; color:var(--text-faint); font-family:'JetBrains Mono',monospace; }
+
+  .kc-flex{ display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+
+  footer{
+    margin-top:44px; padding:22px 0 40px;
+    border-top:1px solid var(--border);
+    font-size:11.5px; color:var(--text-faint);
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;
+    font-family:'JetBrains Mono',monospace;
+  }
+
+  @media (max-width:720px){
+    .index-grid{ grid-template-columns:repeat(2,1fr); }
+    .news-grid{ grid-template-columns:1fr; }
+    .kc-flex{ grid-template-columns:1fr; }
+    .masthead-row{ flex-direction:column; align-items:flex-start; }
+    .meta{ text-align:left; }
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .ticker{ animation:none; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="ticker-wrap">
+    <div class="ticker">
+      
+      <span class="ticker-item"><b>S&P 500</b> 7,752.20 <span class="up">▲ +0.51%</span></span>
+      
+      <span class="ticker-item"><b>Dow Jones</b> 52,660.93 <span class="up">▲ +0.31%</span></span>
+      
+      <span class="ticker-item"><b>Nasdaq</b> 26,700.75 <span class="up">▲ +1.04%</span></span>
+      
+      <span class="ticker-item"><b>10-Yr Yield</b> 5.11% <span class="down">▼ -0.12%</span></span>
+      
+      <span class="ticker-item"><b>VIX</b> 16.64 <span class="down">▼ -3.87%</span></span>
+      
+      <span class="ticker-item"><b>US Dollar Idx</b> 101.80 <span class="up">▲ +0.06%</span></span>
+      
+      <span class="ticker-item"><b>Crude Oil</b> 97.05 <span class="down">▼ -4.66%</span></span>
+      
+      <span class="ticker-item"><b>Gold</b> 4,148.70 <span class="up">▲ +0.15%</span></span>
+      
+      
+      <span class="ticker-item"><b>S&P 500</b> 7,752.20 <span class="up">▲ +0.51%</span></span>
+      
+      <span class="ticker-item"><b>Dow Jones</b> 52,660.93 <span class="up">▲ +0.31%</span></span>
+      
+      <span class="ticker-item"><b>Nasdaq</b> 26,700.75 <span class="up">▲ +1.04%</span></span>
+      
+      <span class="ticker-item"><b>10-Yr Yield</b> 5.11% <span class="down">▼ -0.12%</span></span>
+      
+      <span class="ticker-item"><b>VIX</b> 16.64 <span class="down">▼ -3.87%</span></span>
+      
+      <span class="ticker-item"><b>US Dollar Idx</b> 101.80 <span class="up">▲ +0.06%</span></span>
+      
+      <span class="ticker-item"><b>Crude Oil</b> 97.05 <span class="down">▼ -4.66%</span></span>
+      
+      <span class="ticker-item"><b>Gold</b> 4,148.70 <span class="up">▲ +0.15%</span></span>
+      
+    </div>
+  </div>
+
+  <div class="wrap">
+    <header class="masthead">
+      <div class="masthead-row">
+        <div>
+          <div class="brand">CENTER<span>LINE</span></div>
+          <div class="tagline">Markets · Missouri &amp; Kansas City · The World — before your coffee's done.</div>
+        </div>
+        <div class="meta">
+          <div><span class="liveDot"></span>Wednesday, October 21, 2026</div>
+          <div>Updated 11:17 AM CT</div>
+          <div style="margin-top:6px;"><a href="index.html" style="color:var(--accent); text-decoration:none;">View Archive →</a></div>
+        </div>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="section-label">U.S. Markets</div>
+      <div class="index-grid">
+        
+        <div class="index-card">
+          <div class="index-name">S&P 500</div>
+          <div class="index-price">7,752.20</div>
+          <div class="index-change up">▲ +0.51%</div>
+        </div>
+        
+        <div class="index-card">
+          <div class="index-name">Dow Jones</div>
+          <div class="index-price">52,660.93</div>
+          <div class="index-change up">▲ +0.31%</div>
+        </div>
+        
+        <div class="index-card">
+          <div class="index-name">Nasdaq</div>
+          <div class="index-price">26,700.75</div>
+          <div class="index-change up">▲ +1.04%</div>
+        </div>
+        
+        <div class="index-card">
+          <div class="index-name">10-Yr Yield</div>
+          <div class="index-price">5.11%</div>
+          <div class="index-change down">▼ -0.12%</div>
+        </div>
+        
+        <div class="index-card">
+          <div class="index-name">VIX</div>
+          <div class="index-price">16.64</div>
+          <div class="index-change down">▼ -3.87%</div>
+        </div>
+        
+        <div class="index-card">
+          <div class="index-name">US Dollar Idx</div>
+          <div class="index-price">101.80</div>
+          <div class="index-change up">▲ +0.06%</div>
+        </div>
+        
+        <div class="index-card">
+          <div class="index-name">Crude Oil</div>
+          <div class="index-price">97.05</div>
+          <div class="index-change down">▼ -4.66%</div>
+        </div>
+        
+        <div class="index-card">
+          <div class="index-name">Gold</div>
+          <div class="index-price">4,148.70</div>
+          <div class="index-change up">▲ +0.15%</div>
+        </div>
+        
+      </div>
+
+      <div class="chart-panel">
+        <div class="chart-panel-head">
+          <div class="chart-title">S&amp;P 500 — 5 Day</div>
+          <div class="chart-sub">Thu 9:30AM → Wed 12:00PM</div>
+        </div>
+        <div class="chart-box"><canvas id="spxChart"></canvas></div>
+      </div>
+
+      <div class="watchlist">
+        <div class="watchlist-head">Stocks to Watch</div>
+        <table class="wl">
+          
+          <tr>
+            <td class="wl-ticker">AAPL</td>
+            <td class="wl-name">Apple</td>
+            <td class="wl-price">343.58</td>
+            <td class="wl-change up">▲ +1.20%</td>
+          </tr>
+          
+          <tr>
+            <td class="wl-ticker">MSFT</td>
+            <td class="wl-name">Microsoft</td>
+            <td class="wl-price">531.47</td>
+            <td class="wl-change down">▼ -0.07%</td>
+          </tr>
+          
+          <tr>
+            <td class="wl-ticker">NVDA</td>
+            <td class="wl-name">NVIDIA</td>
+            <td class="wl-price">220.32</td>
+            <td class="wl-change up">▲ +1.78%</td>
+          </tr>
+          
+          <tr>
+            <td class="wl-ticker">AMZN</td>
+            <td class="wl-name">Amazon</td>
+            <td class="wl-price">262.70</td>
+            <td class="wl-change up">▲ +0.03%</td>
+          </tr>
+          
+          <tr>
+            <td class="wl-ticker">GOOGL</td>
+            <td class="wl-name">Alphabet</td>
+            <td class="wl-price">333.10</td>
+            <td class="wl-change down">▼ -2.11%</td>
+          </tr>
+          
+          <tr>
+            <td class="wl-ticker">TSLA</td>
+            <td class="wl-name">Tesla</td>
+            <td class="wl-price">386.71</td>
+            <td class="wl-change up">▲ +3.48%</td>
+          </tr>
+          
+          <tr>
+            <td class="wl-ticker">JPM</td>
+            <td class="wl-name">JPMorgan Chase</td>
+            <td class="wl-price">333.90</td>
+            <td class="wl-change down">▼ -0.41%</td>
+          </tr>
+          
+        </table>
+      </div>
+    </section>
+
+    <section class="news-grid">
+      <div class="news-card">
+        <div class="news-card-head">
+          <span class="badge">NATIONAL</span>
+          <span class="news-card-title">Business &amp; Economy</span>
+        </div>
+        
+        <div class="news-item">
+          <a href="https://www.cnbc.com/2026/10/21/ebay-layoffs-workforce-cuts.html" target="_blank" rel="noopener">EBay to lay off 9% of workforce in its second round of job cuts this year</a>
+          <div class="news-source">CNBC</div>
+        </div>
+        
+        <div class="news-item">
+          <a href="https://www.cnbc.com/2026/10/21/why-broadcast-tv-still-dominates-political-ad-spending.html" target="_blank" rel="noopener">The political ad wars are still being fought over the airwaves even as digital gains share</a>
+          <div class="news-source">CNBC</div>
+        </div>
+        
+        <div class="news-item">
+          <a href="https://www.cnbc.com/2026/10/21/goldman-sachs-jpmorgan-morgan-stanley-ai-trading.html" target="_blank" rel="noopener">Goldman Sachs, JPMorgan and Morgan Stanley are dominating the AI stock boom. Here's their edge</a>
+          <div class="news-source">CNBC</div>
+        </div>
+        
+        <div class="news-item">
+          <a href="https://www.cnbc.com/2026/10/21/united-airlines-biggest-airport-lounge-houston.html" target="_blank" rel="noopener">United Airlines set to open its biggest airport lounge in $2.6 billion overhaul at Houston hub</a>
+          <div class="news-source">CNBC</div>
+        </div>
+        
+        <div class="news-item">
+          <a href="https://www.cnbc.com/2026/10/20/united-airlines-ual-3q-2026-earnings.html" target="_blank" rel="noopener">United Airlines slashes 2026 profit outlook on fuel prices, but travelers keep booking despite higher fares</a>
+          <div class="news-source">CNBC</div>
+        </div>
+        
+      </div>
+
+      <div class="news-card">
+        <div class="news-card-head">
+          <span class="badge">WORLD</span>
+          <span class="news-card-title">International</span>
+        </div>
+        
+        <div class="news-item">
+          <a href="https://www.bbc.co.uk/news/articles/cq3djn5nxx12o?at_medium=RSS&at_campaign=rss" target="_blank" rel="noopener">Russia ready to resume talks with Ukraine and US to end war</a>
+          <div class="news-source">BBC World</div>
+        </div>
+        
+        <div class="news-item">
+          <a href="https://www.bbc.co.uk/news/articles/ckjrw044ggxgo?at_medium=RSS&at_campaign=rss" target="_blank" rel="noopener">Macron accuses foreign leaders of exploiting French riots</a>
+          <div class="news-source">BBC World</div>
+        </div>
+        
+        <div class="news-item">
+          <a href="https://www.bbc.co.uk/news/articles/ckwyqdqxw6d0o?at_medium=RSS&at_campaign=rss" target="_blank" rel="noopener">Australian MP loses both legs after alleged car attack, husband says</a>
+          <div class="news-source">BBC World</div>
+        </div>
+        
+        <div class="news-item">
+          <a href="https://www.bbc.co.uk/news/articles/cmlyl09xjke4o?at_medium=RSS&at_campaign=rss" target="_blank" rel="noopener">Elon Musk confirms he is considering merging Tesla and SpaceX</a>
+          <div class="news-source">BBC World</div>
+        </div>
+        
+        <div class="news-item">
+          <a href="https://www.bbc.co.uk/news/articles/ckdd8m1z1z3yo?at_medium=RSS&at_campaign=rss" target="_blank" rel="noopener">Pakistan arrests man wanted by US over $126m postage fraud case</a>
+          <div class="news-source">BBC World</div>
+        </div>
+        
+      </div>
+
+      <div class="news-card kc">
+        <div class="news-card-head">
+          <span class="badge kc">HOME TURF</span>
+          <span class="news-card-title">Missouri &amp; Kansas City</span>
+        </div>
+        <div class="kc-flex">
+          <div>
+            
+            <div class="news-item">
+              <a href="https://www.kshb.com/politics/america-votes/el-sayed-rogers-set-to-debate-in-closely-watched-michigan-senate-race" target="_blank" rel="noopener">El-Sayed, Rogers set to debate in closely watched Michigan Senate race</a>
+              <div class="news-source">KSHB 41</div>
+            </div>
+            
+            <div class="news-item">
+              <a href="https://www.kshb.com/us-news/more-than-half-of-americans-say-they-no-longer-feel-like-themselves" target="_blank" rel="noopener">More than half of Americans say they no longer feel like themselves</a>
+              <div class="news-source">KSHB 41</div>
+            </div>
+            
+            <div class="news-item">
+              <a href="https://www.kshb.com/politics/supreme-court/supreme-court-rejects-trump-administration-bid-to-restrict-transgender-prison-health-care" target="_blank" rel="noopener">Supreme Court rejects Trump administration bid to restrict transgender prison health care</a>
+              <div class="news-source">KSHB 41</div>
+            </div>
+            
+          </div>
+          <div>
+            
+            <div class="news-item">
+              <a href="https://www.kshb.com/news/crime/kcpd-seeks-publics-help-to-locate-vehicle-of-interest-in-homicide-near-42nd-troost" target="_blank" rel="noopener">KCPD seeks public’s help to locate vehicle of interest in homicide near 42nd, Troost</a>
+              <div class="news-source">KSHB 41</div>
+            </div>
+            
+            <div class="news-item">
+              <a href="https://www.kshb.com/life/faith-and-religion/pope-returns-to-popemobile-for-first-open-appearance-since-hospitalization" target="_blank" rel="noopener">Pope returns to popemobile for first open appearance since hospitalization</a>
+              <div class="news-source">KSHB 41</div>
+            </div>
+            
+            <div class="news-item">
+              <a href="https://www.kshb.com/politics/russia/putin-agrees-to-resume-ukraine-peace-talks-after-meeting-with-trump-envoy" target="_blank" rel="noopener">Putin agrees to resume Ukraine peace talks after meeting with Trump envoy</a>
+              <div class="news-source">KSHB 41</div>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div>Market data via Yahoo Finance · News via public RSS feeds · Auto-generated, not investment advice.</div>
+      <div>Next update tomorrow 7:00 AM CT</div>
+    </footer>
+  </div>
+
+<script>
+  const ctx = document.getElementById('spxChart').getContext('2d');
+  const labels = ["Thu 9:30AM", "Thu 10:00AM", "Thu 10:30AM", "Thu 11:00AM", "Thu 11:30AM", "Thu 12:00PM", "Thu 12:30PM", "Thu 1:00PM", "Thu 1:30PM", "Thu 2:00PM", "Thu 2:30PM", "Thu 3:00PM", "Thu 3:30PM", "Fri 9:30AM", "Fri 10:00AM", "Fri 10:30AM", "Fri 11:00AM", "Fri 11:30AM", "Fri 12:00PM", "Fri 12:30PM", "Fri 1:00PM", "Fri 1:30PM", "Fri 2:00PM", "Fri 2:30PM", "Fri 3:00PM", "Fri 3:30PM", "Mon 9:30AM", "Mon 10:00AM", "Mon 10:30AM", "Mon 11:00AM", "Mon 11:30AM", "Mon 12:00PM", "Mon 12:30PM", "Mon 1:00PM", "Mon 1:30PM", "Mon 2:00PM", "Mon 2:30PM", "Mon 3:00PM", "Mon 3:30PM", "Tue 9:30AM", "Tue 10:00AM", "Tue 10:30AM", "Tue 11:00AM", "Tue 11:30AM", "Tue 12:00PM", "Tue 12:30PM", "Tue 1:00PM", "Tue 1:30PM", "Tue 2:00PM", "Tue 2:30PM", "Tue 3:00PM", "Tue 3:30PM", "Wed 9:30AM", "Wed 10:00AM", "Wed 10:30AM", "Wed 11:00AM", "Wed 11:30AM", "Wed 12:00PM"];
+  const data = [7679.01, 7699.54, 7721.71, 7729.52, 7730.64, 7719.69, 7724.97, 7729.95, 7739.85, 7721.98, 7732.44, 7747.1, 7743.88, 7740.26, 7734.52, 7739.5, 7713.16, 7701.05, 7700.76, 7687.69, 7666.45, 7659.56, 7647.42, 7644.17, 7656.82, 7658.74, 7691.71, 7709.72, 7708.04, 7726.18, 7721.1, 7709.08, 7701.57, 7700.39, 7702.38, 7698.93, 7702.17, 7707.41, 7691.92, 7704.34, 7742.65, 7743.44, 7718.86, 7725.44, 7717.84, 7712.71, 7721.83, 7722.12, 7718.2, 7713.34, 7706.66, 7711.7, 7732.46, 7719.43, 7735.58, 7745.9, 7752.87, 7752.24];
+  const isUp = data[data.length-1] >= data[0];
+  const lineColor = isUp ? '#1FCB86' : '#FF5C5C';
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: data,
+        borderColor: lineColor,
+        borderWidth: 2,
+        pointRadius: 0,
+        tension: 0.3,
+        fill: true,
+        backgroundColor: (ctx) => {
+          const g = ctx.chart.ctx.createLinearGradient(0,0,0,220);
+          g.addColorStop(0, lineColor + '33');
+          g.addColorStop(1, lineColor + '00');
+          return g;
+        }
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display:false }, tooltip: { mode:'index', intersect:false } },
+      scales: {
+        x: { grid:{ display:false }, ticks:{ color:'#565E70', font:{ family:'JetBrains Mono', size:10 } } },
+        y: { grid:{ color:'#1B2030' }, ticks:{ color:'#565E70', font:{ family:'JetBrains Mono', size:10 } } }
+      }
+    }
+  });
+</script>
+</body>
+</html>
